@@ -55,47 +55,42 @@ function addTetrahedron(params = {}) {
     scene.add(tetrahedron);
 
     // ワイヤーフレームを追加
-    addWireframe(tetrahedron, geometry);
-}
-addTetrahedron({
-    radius: 1,
-    detail: 0,
-    color: geometryColor,
-    position: { x: 0, y: 0, z: 0 }
-});
-
-/**
- * ワイヤーフレームをメッシュに追加する関数
- * @param {THREE.Mesh} mesh - ワイヤーフレームを追加するメッシュ
- * @param {THREE.Geometry} geometry - ワイヤーフレーム用ジオメトリ
- */
-function addWireframe(mesh, geometry) {
-    const wireframe = new THREE.WireframeGeometry(geometry);
-    const lineMaterial = new THREE.LineBasicMaterial({ color: wireColor });
-    const wireframeMesh = new THREE.LineSegments(wireframe, lineMaterial);
-    mesh.add(wireframeMesh);
+    updateWireframe(tetrahedron, geometry);
 }
 
 /**
  * Tetrahedron のジオメトリ更新
  */
-function updateTetrahedronGeometry() {
+function updateGeometry() {
     const radius = parseFloat(tetraRadiusSlider.value);
     const detail = parseInt(tetraDetailSlider.value);
 
     tetraRadiusValue.innerText = radius;
     tetraDetailValue.innerText = detail;
 
-    const newGeometry = new THREE.TetrahedronGeometry(radius, detail);
+    const geometory = new THREE.TetrahedronGeometry(radius, detail);
     tetrahedron.geometry.dispose();
-    tetrahedron.geometry = newGeometry;
+    tetrahedron.geometry = geometory;
 
     // ワイヤーフレームの再作成
-    while (tetrahedron.children.length > 0) {
-        tetrahedron.remove(tetrahedron.children[0]);
-    }
-    addWireframe(tetrahedron, newGeometry);
+    updateWireframe(tetrahedron, geometory);
 }
+
+/**
+ * メッシュのワイヤーフレームを更新する
+ * @param {THREE.Mesh} mesh - ワイヤーフレームを更新するメッシュ
+ * @param {THREE.Geometry} geometory - ワイヤーフレームのジオメトリ
+ */
+function updateWireframe(mesh, geometory) {
+    while (mesh.children.length > 0) {
+        mesh.remove(mesh.children[0]);
+    }
+    const wireframe = new THREE.WireframeGeometry(geometory);
+    const lineMaterial = new THREE.LineBasicMaterial({ color: wireColor });
+    const wireframeMesh = new THREE.LineSegments(wireframe, lineMaterial);
+    mesh.add(wireframeMesh);
+}
+
 
 // アニメーションループ
 /**
@@ -112,8 +107,8 @@ function animate(mesh) {
 }
 
 // スライダーにイベントリスナー追加
-tetraRadiusSlider.addEventListener('input', updateTetrahedronGeometry);
-tetraDetailSlider.addEventListener('input', updateTetrahedronGeometry);
+tetraRadiusSlider.addEventListener('input', updateGeometry);
+tetraDetailSlider.addEventListener('input', updateGeometry);
 
 // トグルボタンでワイヤーフレーム切替
 tetraWireframeToggle.addEventListener('click', () => {
@@ -122,4 +117,5 @@ tetraWireframeToggle.addEventListener('click', () => {
     tetraWireframeToggle.innerText = !enabled ? 'ON' : 'OFF';
 });
 
+addTetrahedron();
 animate(tetrahedron);

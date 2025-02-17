@@ -23,7 +23,6 @@ const geometryColor = 0xff0000;
 const wireColor = 0xff0000
 const backgroundColor = 0xffffff;
 
-
 // シーン作成
 const scene = new THREE.Scene();
 // ライトの追加

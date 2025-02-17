@@ -1,29 +1,26 @@
 import * as THREE from 'three';
 import { Light } from './Light.js';
 
-// DOM取得
+// DOM 要素の取得
 const canvasContainer = document.getElementById('canvas-container');
 const wireframeToggle = document.getElementById('wireframeToggle');
 
-const radiusTopSlider = document.getElementById('radiusTopSlider');
+const radiusSlider = document.getElementById('radiusSlider');
 const heightSlider = document.getElementById('heightSlider');
-const radiusBottomSlider = document.getElementById('radiusBottomSlider');
 const radialSegSlider = document.getElementById('radialSegSlider');
 const heightSegSlider = document.getElementById('heightSegSlider');
 
-const radiusTopValue = document.getElementById('radiusTopValue');
+const radiusValue = document.getElementById('radiusValue');
 const heightValue = document.getElementById('heightValue');
-const radiusBottomValue = document.getElementById('radiusBottomValue');
 const radialSegValue = document.getElementById('radialSegValue');
 const heightSegValue = document.getElementById('heightSegValue');
 
-// 変数＆定数
-let cylinder;
-let radiusTop = 1;
-let height = 1;
-let radiusBottom = 1;
-let radialSegments = 1;
-let heightSegments = 1;
+// 初期パラメータ
+let cone;
+let radius = parseFloat(radiusSlider.value);           // Coneの底部半径
+let height = parseFloat(heightSlider.value);           // 高さ
+let radialSegments = parseInt(radialSegSlider.value);    // 円周分割数（最小3）
+let heightSegments = parseInt(heightSegSlider.value);    // 高さ方向分割数
 
 const canvasWidth = canvasContainer.clientWidth;
 const canvasHeight = canvasContainer.clientHeight;
@@ -33,11 +30,12 @@ const backgroundColor = 0xffffff;
 
 // シーン作成
 const scene = new THREE.Scene();
-// ライトの追加
+
+// ライト追加 (Light.js 内のクラスを使用)
 const light = new Light();
 light.add(scene);
 
-// カメラ作成 (視野角75°、アスペクト比はコンテナサイズ、近接面0.1～遠方面1000)
+// カメラ作成
 const camera = new THREE.PerspectiveCamera(75, canvasWidth / canvasHeight, 0.1, 1000);
 camera.position.z = 5;
 
@@ -48,44 +46,43 @@ renderer.setClearColor(backgroundColor, 1);
 canvasContainer.appendChild(renderer.domElement);
 
 /**
- * Cylinder を生成してシーンに追加する関数
+ * Cone を生成してシーンに追加する関数
  * @param {object} params { color, position }
  */
-function addCylinder(params = {}) {
+function addCone(params = {}) {
     const color = params.color || 0xff0000;
     const position = params.position || { x: 0, y: 0, z: 0 };
 
-    // CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength)
-    const geometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, false, 0, Math.PI * 2);
+    // ConeGeometry(radius, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength)
+    const geometry = new THREE.ConeGeometry(radius, height, radialSegments, heightSegments, false, 0, Math.PI * 2);
     const material = new THREE.MeshStandardMaterial({ color: color, wireframe: false });
-    cylinder = new THREE.Mesh(geometry, material);
-    cylinder.position.set(position.x, position.y, position.z);
-    scene.add(cylinder);
+    cone = new THREE.Mesh(geometry, material);
+    cone.position.set(position.x, position.y, position.z);
+    scene.add(cone);
 
     // ワイヤーフレーム追加
-    updateWireframe(cylinder, geometry);
+    updateWireframe(cone, geometry);
 
     updateGeometry();
 }
 
 /**
- * Cylinder のジオメトリ更新
+ * Cone のジオメトリを更新する関数
  */
 function updateGeometry() {
-    // スライダーの値取得と表示更新
-    radiusTopValue.innerText = radiusTop = parseFloat(radiusTopSlider.value);
+    // スライダーから値を取得し表示更新
+    radiusValue.innerText = radius = parseFloat(radiusSlider.value);
     heightValue.innerText = height = parseFloat(heightSlider.value);
-    radiusBottomValue.innerText = radiusBottom = parseFloat(radiusBottomSlider.value);
     radialSegValue.innerText = radialSegments = parseInt(radialSegSlider.value);
     heightSegValue.innerText = heightSegments = parseInt(heightSegSlider.value);
 
-    // 新しいジオメトリ生成
-    const newGeometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments, false, 0, Math.PI * 2);
-    cylinder.geometry.dispose();
-    cylinder.geometry = newGeometry;
+    // 新しいジオメトリ作成
+    const geometory = new THREE.ConeGeometry(radius, height, radialSegments, heightSegments, false, 0, Math.PI * 2);
+    cone.geometry.dispose();
+    cone.geometry = geometory;
 
-    // ワイヤーフレームの再作成
-    updateWireframe(cylinder, newGeometry);
+    // ワイヤーフレーム再作成
+    updateWireframe(cone, geometory);
 }
 
 /**
@@ -104,36 +101,35 @@ function updateWireframe(mesh, geometory) {
 }
 
 /**
- * メッシュのアニメーションループ
- * @param {THREE.Mesh} mesh - アニメーションするメッシュ
+ * アニメーションループ
+ * @param {THREE.Mesh} mesh - アニメーション対象のメッシュ
  */
 function animate(mesh) {
     requestAnimationFrame(animate.bind(null, mesh));
-
     mesh.rotation.x += speed;
     mesh.rotation.y += speed;
-
     renderer.render(scene, camera);
 }
 
-// スライダーにイベントリスナーを追加 (Cylinder)
-radiusTopSlider.addEventListener('input', updateGeometry);
+// スライダーにイベントリスナーを追加
+radiusSlider.addEventListener('input', updateGeometry);
 heightSlider.addEventListener('input', updateGeometry);
-radiusBottomSlider.addEventListener('input', updateGeometry);
 radialSegSlider.addEventListener('input', updateGeometry);
 heightSegSlider.addEventListener('input', updateGeometry);
 
-// トグルボタンでワイヤーフレーム切替
+// ワイヤーフレーム切替ボタン
 wireframeToggle.addEventListener('click', () => {
-    const enabled = cylinder.material.wireframe;
-    cylinder.material.wireframe = !enabled;
-    cylinder.children.forEach(child => {
+    const enabled = cone.material.wireframe;
+    cone.material.wireframe = !enabled;
+    // ワイヤーフレームメッシュの表示切替
+    cone.children.forEach(child => {
         child.visible = !enabled;
     });
-    // ボタンテキスト更新
     wireframeToggle.innerText = !enabled ? 'ON' : 'OFF';
 });
 
-// Cylinder生成
-addCylinder();
-animate(cylinder);
+// Cone 生成
+addCone({ position: { x: 0, y: 0, z: 0 } });
+
+// アニメーション開始
+animate(cone);
