@@ -41,6 +41,7 @@ function addBox(params = {}) {
     const heightSegments = params.heightSegments !== undefined ? params.heightSegments : 1;
     const depthSegments = params.depthSegments !== undefined ? params.depthSegments : 1;
     const color = params.color || 0xff0000;
+    const position = params.position || { x: 0, y: 0, z: 0 };
 
     // Geometry作成
     const geometry = new THREE.BoxGeometry(width, height, depth, widthSegments, heightSegments, depthSegments);
