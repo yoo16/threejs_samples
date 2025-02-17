@@ -1,15 +1,34 @@
 import * as THREE from 'three';
 import { Light } from './Light.js';
 
-// グローバル変数として立方体
+// 変数&定数
 let cube;
+let width = 1;
+let height = 1;
+let depth = 1;
+let widthSeg = 1;
+let heightSeg = 1;
+let depthSeg = 1;
+
 const speed = 0.01;
 const wireColor = 0xff0000
 const backgroundColor = 0xffffff;
 
-// コンテナを取得
+// DOM取得
 const canvasContainer = document.getElementById('canvas-container');
 const wireframeValue = document.getElementById('wireframeValue');
+const widthSlider = document.getElementById('widthSlider');
+const heightSlider = document.getElementById('heightSlider');
+const depthSlider = document.getElementById('depthSlider');
+const widthSegSlider = document.getElementById('widthSegSlider');
+const heightSegSlider = document.getElementById('heightSegSlider');
+const depthSegSlider = document.getElementById('depthSegSlider');
+const widthValue = document.getElementById('widthValue');
+const heightValue = document.getElementById('heightValue');
+const depthValue = document.getElementById('depthValue');
+const widthSegValue = document.getElementById('widthSegValue');
+const heightSegValue = document.getElementById('heightSegValue');
+const depthSegValue = document.getElementById('depthSegValue');
 
 // シーン作成
 const scene = new THREE.Scene();
@@ -31,20 +50,14 @@ canvasContainer.appendChild(renderer.domElement);
 
 /**
  * 立方体を生成してシーンに追加する関数
- * @param {object} params { width, height, depth, widthSegments, heightSegments, depthSegments, color }
+ * @param {object} params { color, position }
  */
 function addBox(params = {}) {
-    const width = params.width !== undefined ? params.width : 1;
-    const height = params.height !== undefined ? params.height : 1;
-    const depth = params.depth !== undefined ? params.depth : 1;
-    const widthSegments = params.widthSegments !== undefined ? params.widthSegments : 1;
-    const heightSegments = params.heightSegments !== undefined ? params.heightSegments : 1;
-    const depthSegments = params.depthSegments !== undefined ? params.depthSegments : 1;
     const color = params.color || 0xff0000;
     const position = params.position || { x: 0, y: 0, z: 0 };
 
     // Geometry作成
-    const geometry = new THREE.BoxGeometry(width, height, depth, widthSegments, heightSegments, depthSegments);
+    const geometry = new THREE.BoxGeometry(width, height, depth, widthSeg, heightSeg, depthSeg);
     // Material作成
     const material = new THREE.MeshStandardMaterial({ color: color, wireframe: false });
     // Mesh作成
@@ -56,25 +69,15 @@ function addBox(params = {}) {
     addWireframe(cube, geometry);
 }
 
-// 初回立方体生成（デフォルトは全て1）
-addBox();
-
 // スライダーの値に応じて立方体のジオメトリを更新する関数
 function updateGeometry() {
-    const width = parseFloat(document.getElementById('widthSlider').value);
-    const height = parseFloat(document.getElementById('heightSlider').value);
-    const depth = parseFloat(document.getElementById('depthSlider').value);
-    const widthSeg = parseInt(document.getElementById('widthSegSlider').value);
-    const heightSeg = parseInt(document.getElementById('heightSegSlider').value);
-    const depthSeg = parseInt(document.getElementById('depthSegSlider').value);
-
     // スライダーの表示値更新
-    document.getElementById('widthValue').innerText = width;
-    document.getElementById('heightValue').innerText = height;
-    document.getElementById('depthValue').innerText = depth;
-    document.getElementById('widthSegValue').innerText = widthSeg;
-    document.getElementById('heightSegValue').innerText = heightSeg;
-    document.getElementById('depthSegValue').innerText = depthSeg;
+    widthValue.innerText = width = parseFloat(widthSlider.value);
+    heightValue.innerText = height = parseFloat(heightSlider.value);
+    depthValue.innerText = depth = parseFloat(depthSlider.value);
+    widthSegValue.innerText = widthSeg = parseInt(widthSegSlider.value);
+    heightSegValue.innerText = heightSeg = parseInt(heightSegSlider.value);
+    depthSegValue.innerText = depthSeg = parseInt(depthSegSlider.value);
 
     // ジオメトリを破棄
     cube.geometry.dispose();
@@ -117,19 +120,15 @@ function updateWireframe(mesh, geometory) {
 // トグルボタンでワイヤーフレーム切替
 const wireframeToggle = document.getElementById('wireframeToggle');
 wireframeToggle.addEventListener('click', () => {
-    // 現在の状態を取得
     const enabled = cube.material.wireframe;
-    // 切り替え：マテリアルの wireframe プロパティ
     cube.material.wireframe = !enabled;
-    // また、子オブジェクト（ワイヤーフレームオブジェクト）の表示も切り替え
-    cube.children.forEach(child => {
-        child.visible = !enabled;
-    });
-    // 表示テキストの更新
     wireframeValue.innerText = !enabled ? 'ON' : 'OFF';
 });
 
-// アニメーションループ
+/**
+ * メッシュのアニメーションループ
+ * @param {THREE.Mesh} mesh - アニメーションするメッシュ
+ */
 function animate(mesh) {
     requestAnimationFrame(animate.bind(null, mesh));
 
@@ -147,4 +146,6 @@ document.getElementById('widthSegSlider').addEventListener('input', updateGeomet
 document.getElementById('heightSegSlider').addEventListener('input', updateGeometry);
 document.getElementById('depthSegSlider').addEventListener('input', updateGeometry);
 
+// 立方体生成
+addBox();
 animate(cube);

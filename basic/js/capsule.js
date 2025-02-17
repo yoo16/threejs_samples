@@ -1,15 +1,26 @@
 import * as THREE from 'three';
 import { Light } from './Light.js';
 
+// 変数&定数
 let capsule;
+let radius = 1;
+let length = 2;
+let capSeg = 8;
+let radialSeg = 8;
+
 const speed = 0.01;
 const geometryColor = 0xff0000;
 const wireColor = 0xff0000
 const backgroundColor = 0xffffff;
 
+// DOM取得
 const canvasContainer = document.getElementById('canvas-container');
 const wireframeToggle = document.getElementById('wireframeToggle');
 const wireframeValue = document.getElementById('wireframeValue');
+const radiusSlider = document.getElementById('radiusSlider');
+const lengthSlider = document.getElementById('lengthSlider');
+const capSegSlider = document.getElementById('capSegSlider');
+const radialSegSlider = document.getElementById('radialSegSlider');
 
 // シーン作成
 const scene = new THREE.Scene();
@@ -29,18 +40,14 @@ canvasContainer.appendChild(renderer.domElement);
 
 /**
  * Capsule を生成してシーンに追加する関数
- * @param {object} params { radius, length, capSegments, radialSegments, color, position }
+ * @param {object} params { color, position }
  */
 function addCapsule(params = {}) {
-    const radius = params.radius !== undefined ? params.radius : 1;
-    const length = params.length !== undefined ? params.length : 2;
-    const capSegments = params.capSegments !== undefined ? params.capSegments : 8;
-    const radialSegments = params.radialSegments !== undefined ? params.radialSegments : 8;
     const color = params.color || geometryColor;
     const position = params.position || { x: 0, y: 0, z: 0 };
 
     // Geometry作成
-    const geometry = new THREE.CapsuleGeometry(radius, length, capSegments, radialSegments);
+    const geometry = new THREE.CapsuleGeometry(radius, length, capSeg, radialSeg);
     // Material作成
     const material = new THREE.MeshStandardMaterial({ color: color, wireframe: false });
     // Mesh作成
@@ -51,29 +58,18 @@ function addCapsule(params = {}) {
     addWireframe(capsule, geometry);
 }
 
-addCapsule({
-    radius: 1,
-    length: 2,
-    capSegments: 8,
-    radialSegments: 8,
-    position: { x: 0, y: 0, z: 0 }
-});
-
-function init() {
-
-}
-
-// Capsule のジオメトリ更新
+/**
+ * スライダーの値に応じてCapsuleのジオメトリを更新する関数
+ * @param {number} radius - Capsuleの半径
+ * @param {number} length - Capsuleの長さ
+ * @param {number} capSeg - Capsuleのcapの分割数
+ * @param {number} radialSeg - Capsuleのradialの分割数
+ */
 function updateGeometry() {
-    const radius = parseFloat(document.getElementById('radiusSlider').value);
-    const length = parseFloat(document.getElementById('lengthSlider').value);
-    const capSeg = parseInt(document.getElementById('capSegSlider').value);
-    const radialSeg = parseInt(document.getElementById('radialSegSlider').value);
-
-    document.getElementById('radiusValue').innerText = radius;
-    document.getElementById('lengthValue').innerText = length;
-    document.getElementById('capsuleSegValue').innerText = capSeg;
-    document.getElementById('radialSegValue').innerText = radialSeg;
+    document.getElementById('radiusValue').innerText = radius = parseFloat(radiusSlider.value);
+    document.getElementById('lengthValue').innerText = length = parseFloat(lengthSlider.value);
+    document.getElementById('capsuleSegValue').innerText = capSeg = parseInt(capSegSlider.value);
+    document.getElementById('radialSegValue').innerText = radialSeg = parseInt(radialSegSlider.value);
 
     // ジオメトリを破棄
     capsule.geometry.dispose();
@@ -111,7 +107,11 @@ function updateWireframe(mesh, geometory) {
     const wireframeMesh = new THREE.LineSegments(wireframe, lineMaterial);
     mesh.add(wireframeMesh);
 }
-// アニメーションループ
+
+/**
+ * メッシュのアニメーションループ
+ * @param {THREE.Mesh} mesh - アニメーションするメッシュ
+ */
 function animate(mesh) {
     requestAnimationFrame(animate.bind(null, mesh));
 
@@ -122,19 +122,17 @@ function animate(mesh) {
 }
 
 // スライダーイベント
-document.getElementById('radiusSlider').addEventListener('input', updateGeometry);
-document.getElementById('lengthSlider').addEventListener('input', updateGeometry);
-document.getElementById('capSegSlider').addEventListener('input', updateGeometry);
-document.getElementById('radialSegSlider').addEventListener('input', updateGeometry);
+radiusSlider.addEventListener('input', updateGeometry);
+lengthSlider.addEventListener('input', updateGeometry);
+capSegSlider.addEventListener('input', updateGeometry);
+radialSegSlider.addEventListener('input', updateGeometry);
 
 // トグルボタンでワイヤーフレーム切替
 wireframeToggle.addEventListener('click', () => {
     const enabled = capsule.material.wireframe;
     capsule.material.wireframe = !enabled;
-    capsule.children.forEach(child => {
-        child.visible = !enabled;
-    });
     wireframeValue.innerText = !enabled ? 'ON' : 'OFF';
 });
 
+addCapsule();
 animate(capsule);

@@ -1,15 +1,28 @@
 import * as THREE from 'three';
 import { Light } from './Light.js';
 
+// 変数&定数
 let sphere;
+let radius = 1;
+let widthSeg = 1;
+let heightSeg = 1;
+
 const speed = 0.01;
 const sphereColor = 0xff0000;
 const wireColor = 0xff0000
 const backgroundColor = 0xffffff;
 
+// DOM取得
 const canvasContainer = document.getElementById('canvas-container');
 const wireframeValue = document.getElementById('wireframeValue');
 const wireframeToggle = document.getElementById('wireframeToggle');
+
+const radiusSlider = document.getElementById('radiusSlider');
+const widthSegSlider = document.getElementById('widthSegSlider');
+const heightSegSlider = document.getElementById('heightSegSlider');
+const radiusValue = document.getElementById('radiusValue');
+const widthSegValue = document.getElementById('widthSegValue');
+const heightSegValue = document.getElementById('heightSegValue');
 
 // シーン作成
 const scene = new THREE.Scene();
@@ -32,14 +45,11 @@ canvasContainer.appendChild(renderer.domElement);
  * @param {object} params { radius, widthSegments, heightSegments, color, position }
  */
 function addSphere(params = {}) {
-    const radius = params.radius !== undefined ? params.radius : 1;
-    const widthSegments = params.widthSegments !== undefined ? params.widthSegments : 32;
-    const heightSegments = params.heightSegments !== undefined ? params.heightSegments : 32;
     const color = params.color || sphereColor;
     const position = params.position || { x: 0, y: 0, z: 0 };
 
     // Geometry作成
-    const geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
+    const geometry = new THREE.SphereGeometry(radius, widthSeg, heightSeg);
     // Material作成
     const material = new THREE.MeshStandardMaterial({ color: color, wireframe: false });
     // Mesh作成
@@ -53,13 +63,10 @@ function addSphere(params = {}) {
 
 // Sphere のジオメトリ更新
 function updateGeometry() {
-    const radius = parseFloat(document.getElementById('radiusSlider').value);
-    const widthSeg = parseInt(document.getElementById('widthSegSlider').value);
-    const heightSeg = parseInt(document.getElementById('heightSegSlider').value);
-
-    document.getElementById('radiusValue').innerText = radius;
-    document.getElementById('widthSegValue').innerText = widthSeg;
-    document.getElementById('heightSegValue').innerText = heightSeg;
+    // スライダーの表示値更新
+    radiusValue.innerText = radius = parseFloat(radiusSlider.value);
+    widthSegValue.innerText = widthSeg = parseInt(widthSegSlider.value);
+    heightSegValue.innerText = heightSeg = parseInt(heightSegSlider.value);
 
     // ジオメトリを破棄
     sphere.geometry.dispose();
@@ -99,7 +106,10 @@ function updateWireframe(mesh, geometory) {
     mesh.add(wireframeMesh);
 }
 
-// アニメーションループ
+/**
+ * メッシュのアニメーションループ
+ * @param {THREE.Mesh} mesh - アニメーションするメッシュ
+ */
 function animate(mesh) {
     requestAnimationFrame(animate.bind(null, mesh));
 
@@ -118,11 +128,8 @@ document.getElementById('heightSegSlider').addEventListener('input', updateGeome
 wireframeToggle.addEventListener('click', () => {
     const enabled = sphere.material.wireframe;
     sphere.material.wireframe = !enabled;
-    sphere.children.forEach(child => {
-        child.visible = !enabled;
-    });
     wireframeValue.innerText = !enabled ? 'ON' : 'OFF';
 });
 
-addSphere({ radius: 1 });
+addSphere();
 animate(sphere);
