@@ -1,6 +1,14 @@
 import * as THREE from 'three';
 import { Light } from './Light.js';
 
+// DOM取得
+const canvasContainer = document.getElementById('canvas-container');
+const wireframeToggle = document.getElementById('wireframeToggle');
+const radiusSlider = document.getElementById('radiusSlider');
+const lengthSlider = document.getElementById('lengthSlider');
+const capSegSlider = document.getElementById('capSegSlider');
+const radialSegSlider = document.getElementById('radialSegSlider');
+
 // 変数&定数
 let capsule;
 let radius = 1;
@@ -8,19 +16,13 @@ let length = 2;
 let capSeg = 8;
 let radialSeg = 8;
 
+const canvasWidth = canvasContainer.clientWidth;
+const canvasHeight = canvasContainer.clientHeight;
 const speed = 0.01;
 const geometryColor = 0xff0000;
 const wireColor = 0xff0000
 const backgroundColor = 0xffffff;
 
-// DOM取得
-const canvasContainer = document.getElementById('canvas-container');
-const wireframeToggle = document.getElementById('wireframeToggle');
-const wireframeValue = document.getElementById('wireframeValue');
-const radiusSlider = document.getElementById('radiusSlider');
-const lengthSlider = document.getElementById('lengthSlider');
-const capSegSlider = document.getElementById('capSegSlider');
-const radialSegSlider = document.getElementById('radialSegSlider');
 
 // シーン作成
 const scene = new THREE.Scene();
@@ -28,13 +30,13 @@ const scene = new THREE.Scene();
 const light = new Light();
 light.add(scene);
 
-// カメラ作成（コンテナサイズに合わせる）
-const camera = new THREE.PerspectiveCamera(75, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 1000);
+// カメラ作成 (視野角75°、アスペクト比はコンテナサイズ、近接面0.1～遠方面1000)
+const camera = new THREE.PerspectiveCamera(75, canvasWidth / canvasHeight, 0.1, 1000);
 camera.position.z = 5;
 
 // レンダラー作成
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+renderer.setSize(canvasWidth, canvasHeight);
 renderer.setClearColor(backgroundColor, 1);
 canvasContainer.appendChild(renderer.domElement);
 
@@ -55,7 +57,9 @@ function addCapsule(params = {}) {
     capsule.position.set(position.x, position.y, position.z);
     scene.add(capsule);
     // ワイヤーフレーム追加
-    addWireframe(capsule, geometry);
+    updateWireframe(capsule, geometry);
+
+    updateGeometry();
 }
 
 /**
@@ -79,18 +83,6 @@ function updateGeometry() {
     capsule.geometry = newGeometry;
 
     updateWireframe(capsule, newGeometry)
-}
-
-/**
- * メッシュにワイヤーフレームを追加する
- * @param {THREE.Mesh} mesh - ワイヤーフレームを追加するメッシュ
- * @param {THREE.Geometry} geometry - ワイヤーフレームのジオメトリ
- */
-function addWireframe(mesh, geometry) {
-    const wireframe = new THREE.WireframeGeometry(geometry);
-    const lineMaterial = new THREE.LineBasicMaterial({ color: wireColor });
-    const wireframeMesh = new THREE.LineSegments(wireframe, lineMaterial);
-    mesh.add(wireframeMesh);
 }
 
 /**
@@ -131,7 +123,7 @@ radialSegSlider.addEventListener('input', updateGeometry);
 wireframeToggle.addEventListener('click', () => {
     const enabled = capsule.material.wireframe;
     capsule.material.wireframe = !enabled;
-    wireframeValue.innerText = !enabled ? 'ON' : 'OFF';
+    wireframeToggle.innerText = !enabled ? 'ON' : 'OFF';
 });
 
 addCapsule();

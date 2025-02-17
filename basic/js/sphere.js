@@ -1,20 +1,8 @@
 import * as THREE from 'three';
 import { Light } from './Light.js';
 
-// 変数&定数
-let sphere;
-let radius = 1;
-let widthSeg = 1;
-let heightSeg = 1;
-
-const speed = 0.01;
-const sphereColor = 0xff0000;
-const wireColor = 0xff0000
-const backgroundColor = 0xffffff;
-
 // DOM取得
 const canvasContainer = document.getElementById('canvas-container');
-const wireframeValue = document.getElementById('wireframeValue');
 const wireframeToggle = document.getElementById('wireframeToggle');
 
 const radiusSlider = document.getElementById('radiusSlider');
@@ -24,6 +12,20 @@ const radiusValue = document.getElementById('radiusValue');
 const widthSegValue = document.getElementById('widthSegValue');
 const heightSegValue = document.getElementById('heightSegValue');
 
+
+// 変数&定数
+let sphere;
+let radius = 1;
+let widthSeg = 1;
+let heightSeg = 1;
+
+const canvasWidth = canvasContainer.clientWidth;
+const canvasHeight = canvasContainer.clientHeight;
+const speed = 0.01;
+const sphereColor = 0xff0000;
+const wireColor = 0xff0000
+const backgroundColor = 0xffffff;
+
 // シーン作成
 const scene = new THREE.Scene();
 // ライトの追加
@@ -31,18 +33,18 @@ const light = new Light();
 light.add(scene);
 
 // カメラ作成 (視野角75°、アスペクト比はコンテナサイズ、近接面0.1～遠方面1000)
-const camera = new THREE.PerspectiveCamera(75, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(75, canvasWidth / canvasHeight, 0.1, 1000);
 camera.position.z = 5;
 
 // レンダラー作成
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+renderer.setSize(canvasWidth, canvasHeight);
 renderer.setClearColor(backgroundColor, 1);
 canvasContainer.appendChild(renderer.domElement);
 
 /**
  * Sphere を生成してシーンに追加する関数
- * @param {object} params { radius, widthSegments, heightSegments, color, position }
+ * @param {object} params { color, position }
  */
 function addSphere(params = {}) {
     const color = params.color || sphereColor;
@@ -58,7 +60,9 @@ function addSphere(params = {}) {
     // シーンに追加
     scene.add(sphere);
     // ワイヤーフレーム追加
-    addWireframe(sphere, geometry);
+    updateWireframe(sphere, geometry);
+
+    updateGeometry();
 }
 
 // Sphere のジオメトリ更新
@@ -77,18 +81,6 @@ function updateGeometry() {
 
     // ワイヤーフレームの再作成
     updateWireframe(sphere, newGeometry);
-}
-
-/**
- * メッシュにワイヤーフレームを追加する
- * @param {THREE.Mesh} mesh - ワイヤーフレームを追加するメッシュ
- * @param {THREE.Geometry} geometry - ワイヤーフレームのジオメトリ
- */
-function addWireframe(mesh, geometry) {
-    const wireframe = new THREE.WireframeGeometry(geometry);
-    const lineMaterial = new THREE.LineBasicMaterial({ color: wireColor });
-    const wireframeMesh = new THREE.LineSegments(wireframe, lineMaterial);
-    mesh.add(wireframeMesh);
 }
 
 /**
@@ -120,15 +112,15 @@ function animate(mesh) {
 }
 
 // スライダーにイベントリスナーを追加 (Sphere)
-document.getElementById('radiusSlider').addEventListener('input', updateGeometry);
-document.getElementById('widthSegSlider').addEventListener('input', updateGeometry);
-document.getElementById('heightSegSlider').addEventListener('input', updateGeometry);
+radiusSlider.addEventListener('input', updateGeometry);
+widthSegSlider.addEventListener('input', updateGeometry);
+heightSegSlider.addEventListener('input', updateGeometry);
 
 // トグルボタンでワイヤーフレーム切替 (Sphere)
 wireframeToggle.addEventListener('click', () => {
     const enabled = sphere.material.wireframe;
     sphere.material.wireframe = !enabled;
-    wireframeValue.innerText = !enabled ? 'ON' : 'OFF';
+    wireframeToggle.innerText = !enabled ? 'ON' : 'OFF';
 });
 
 addSphere();

@@ -22,9 +22,9 @@
         <h1 class="text-3xl font-bold text-center mb-4">SphereGeometry</h1>
         <div class="flex flex-col md:flex-row gap-4 h-screen">
             <!-- 左側：Canvas表示領域 -->
-            <div id="canvas-container" class="w-2/3"></div>
+            <div id="canvas-container" class="w-3/4"></div>
             <!-- 右側：コントロールパネル -->
-            <div class="w-1/3 p-4 border-l border-gray-300 space-y-4">
+            <div class="w-1/4 p-4 border-l border-gray-300 space-y-4">
                 <!-- Sphere Controls -->
                 <div>
                     <div>
@@ -48,13 +48,11 @@
                         <input type="range" id="heightSegSlider" min="2" max="64" step="1" value="32"
                             class="w-full">
                     </div>
-                    <div>
-                        <label class="block text-sm">
-                            Wireframe: <span id="wireframeValue">ON</span>
-                        </label>
-                        <button id="wireframeToggle" class="w-full bg-blue-500 text-white p-2 rounded">
-                            Toggle Wireframe
-                        </button>
+                    <!-- トグルボタンでワイヤーフレーム切替 -->
+                    <div class="flex">
+                        <label class="block text-sm">Wireframe</label>
+                        <button id="wireframeToggle"
+                            class="text-xs bg-blue-500 text-white mx-2 p-2 rounded">OFF</button>
                     </div>
                 </div>
             </div>
