@@ -18,12 +18,12 @@ document.body.appendChild(renderer.domElement);
  * 立方体を生成してシーンに追加
  * @return {THREE.Mesh} 立方体のメッシュ
  */
-function addBox(params = {}) {
-    const width = params.width || 1;
-    const height = params.height || 1;
-    const depth = params.depth || 1;
-    const color = params.color || 0xff0000;
-    const position = params.position || { x: 0, y: 0, z: 0 };
+function addBox() {
+    const width = 1;
+    const height = 1;
+    const depth = 1;
+    const color = 0xff0000;
+    const position = { x: 0, y: 0, z: 0 };
 
     const geometry = new THREE.BoxGeometry(width, height, depth);
     const material = new THREE.MeshStandardMaterial({ color: color });
@@ -40,11 +40,11 @@ function addBox(params = {}) {
  * @return {THREE.Mesh} 球体のメッシュ
  */
 function addSphere(params = {}) {
-    const radius = params.radius || 1;
-    const width = params.width || 16;
-    const height = params.height || 16;
-    const color = params.color || 0xff0000;
-    const position = params.position || { x: 0, y: 0, z: 0 };
+    const radius = 1;
+    const width = 16;
+    const height = 16;
+    const color = 0xff0000;
+    const position = { x: 0, y: 0, z: 0 };
 
     const geometry = new THREE.SphereGeometry(radius, width, height);
     const material = new THREE.MeshStandardMaterial({ color: color });
@@ -111,19 +111,8 @@ function addTextSprite(message, params = {}) {
 }
 
 // 立方体と球体をグローバル変数として作成
-const cube = addBox({
-    color: 0x00ff00,
-    position: { x: -2, y: 0, z: 0 },
-    width: 2, height: 1, depth: 1,
-    widthSegments: 2, heightSegments: 1, depthSegments: 1, 
-});
-const sphere = addSphere(
-    {
-        color: 0x00ff00,
-        radius: 1,
-        position: { x: 2, y: 0, z: 0 }
-    }
-);
+const cube = addBox();
+const sphere = addSphere();
 
 // テキストスプライトを作成し、シーンに追加
 const textSprite = addTextSprite("Hello, Three.js!", {
