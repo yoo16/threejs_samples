@@ -2,6 +2,7 @@ import * as THREE from 'https://unpkg.com/three@0.155.0/build/three.module.js';
 import { Car } from './car.js';
 import { loadTrack, outerPolygon, innerPolygon, isPointInPolygon } from './track.js';
 
+const speedDisplay = document.getElementById('speed-display');
 const canvas = document.getElementById('race-canvas');
 const renderer = new THREE.WebGLRenderer({ canvas });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -45,8 +46,8 @@ function checkCollision() {
     const inOuter = isPointInPolygon(front, outerPolygon);
     const inInner = isPointInPolygon(front, innerPolygon);
     if (!(inOuter && !inInner)) {
-        car.speed = 0;
-        console.log("💥 衝突！");
+        car.crashed = true;
+        console.log("💥 コースアウト！");
     }
 }
 
@@ -55,7 +56,20 @@ function animate() {
     requestAnimationFrame(animate);
     car.update();
     checkCollision();
+    updateSpeedDisplay();
     renderer.render(scene, camera);
+}
+
+function updateSpeedDisplay() {
+    if (car.speed === NaN) return;
+    // px から 時速(km)を計算
+    // requestAnimationFrameの間隔は約16.67ms
+    let speedDisplayValue = car.speed * 60 * 60 / 1000; // px/s -> km/h
+    speedDisplayValue = Math.round(speedDisplayValue * 10) / 10; // 小数点1桁まで
+    if (speedDisplayValue < 1) {
+        speedDisplayValue = 0;
+    }
+    speedDisplay.innerText = speedDisplayValue;
 }
 
 // 実行
